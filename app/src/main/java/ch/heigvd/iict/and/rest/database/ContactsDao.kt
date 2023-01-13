@@ -7,6 +7,7 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
 import ch.heigvd.iict.and.rest.models.Contact
+import ch.heigvd.iict.and.rest.models.ContactState
 
 @Dao
 interface ContactsDao {
@@ -20,14 +21,22 @@ interface ContactsDao {
     @Delete
     fun delete(contact: Contact)
 
-    @Query("SELECT * FROM Contact")
-    fun getAllContactsLiveData() : LiveData<List<Contact>>
+    fun softDelete(contact: Contact) {
+        contact.state = ContactState.DELETED
+        update(contact)
+    }
 
-    @Query("SELECT * FROM Contact WHERE id = :id")
-    fun getContactById(id : Long) : Contact?
+    @Query("SELECT * FROM contact WHERE state = :state")
+    fun getAllContactsByState(state: ContactState) : List<Contact>
 
-    @Query("SELECT COUNT(*) FROM Contact")
-    fun getCount() : Int
+    @Query("SELECT * FROM Contact WHERE state != :state")
+    fun getAllContactsLiveData(state: ContactState = ContactState.DELETED) : LiveData<List<Contact>>
+
+    @Query("SELECT * FROM Contact WHERE id = :id AND state != :state")
+    fun getContactById(id : Long, state: ContactState = ContactState.DELETED) : Contact?
+
+    @Query("SELECT COUNT(*) FROM Contact WHERE state != :state")
+    fun getCount(state: ContactState = ContactState.DELETED) : Int
 
     @Query("DELETE FROM Contact")
     fun clearAllContacts()
