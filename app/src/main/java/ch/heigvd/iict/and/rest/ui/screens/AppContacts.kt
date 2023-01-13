@@ -8,6 +8,9 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -23,6 +26,7 @@ import ch.heigvd.iict.and.rest.viewmodels.ContactsViewModelFactory
 fun AppContact(application: ContactsApplication, contactsViewModel : ContactsViewModel = viewModel(factory= ContactsViewModelFactory(application))) {
     val context = LocalContext.current
     val contacts : List<Contact> by contactsViewModel.allContacts.observeAsState(initial = emptyList())
+    var editionMode by rememberSaveable{ mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -41,17 +45,22 @@ fun AppContact(application: ContactsApplication, contactsViewModel : ContactsVie
         floatingActionButtonPosition = FabPosition.End,
         floatingActionButton = {
             FloatingActionButton(onClick = {
-                Toast.makeText(context, "TODO - Création d'un nouveau contact", Toast.LENGTH_SHORT).show()
+                editionMode = true
             }){
                 Icon(Icons.Default.Add, contentDescription = null)
             }
         },
     )
     { padding ->
-        Column(modifier = Modifier.padding(padding)) {  }
-        ScreenContactList(contacts) { selectedContact ->
-            Toast.makeText(context, "TODO - Edition de ${selectedContact.firstname} ${selectedContact.name}", Toast.LENGTH_SHORT).show()
+        Column(modifier = Modifier.padding(padding)) { }
+
+        if (editionMode) { // editionMode
+            ScreenContactEditor(contact= null, { editionMode = false})
+        } else {
+            ScreenContactList(contacts) { selectedContact ->
+                editionMode = true
+                Toast.makeText(context, "TODO - Edition de ${selectedContact.firstname} ${selectedContact.name}", Toast.LENGTH_SHORT).show()
+            }
         }
     }
-
 }

@@ -1,5 +1,6 @@
 package ch.heigvd.iict.and.rest.viewmodels
 
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -12,10 +13,12 @@ class ContactsViewModel(application: ContactsApplication) : AndroidViewModel(app
     private val repository = application.repository
 
     val allContacts = repository.allContacts
+    private lateinit var uuid: String
 
     fun enroll() {
         viewModelScope.launch {
-            //TODO
+            uuid = repository.enroll()
+            Log.d("ContactsViewModel", "Enroll UUID: $uuid")
         }
     }
 
