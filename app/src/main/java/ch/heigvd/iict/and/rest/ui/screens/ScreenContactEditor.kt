@@ -18,7 +18,9 @@ import ch.heigvd.iict.and.rest.models.Contact
 import ch.heigvd.iict.and.rest.models.PhoneType
 
 @Composable
-fun ScreenContactEditor (contact: Contact?, onQuit: () -> Unit) {
+fun ScreenContactEditor(contact: Contact?, onQuit: () -> Unit) {
+
+    // TODO: etat sauvegardé: https://developer.android.com/jetpack/compose/state#restore-ui-state
 
     val (selectedOption, onOptionSelected) = remember { mutableStateOf(PhoneType.HOME) } // tmp test
 
@@ -27,14 +29,40 @@ fun ScreenContactEditor (contact: Contact?, onQuit: () -> Unit) {
 
         // todo: map functions to contact object
 
-        ContactEditRow(stringResource(R.string.screen_detail_name_subtitle), "", onValueChange = { it })
-        ContactEditRow(stringResource(R.string.screen_detail_firstname_subtitle), "", onValueChange = { it })
-        ContactEditRow(stringResource(R.string.screen_detail_birthday_subtitle), "", onValueChange = { it }) // Pas besoin de date picker, readonly
-        ContactEditRow(stringResource(R.string.screen_detail_address_subtitle), "", onValueChange = { it })
-        ContactEditRow(stringResource(R.string.screen_detail_zip_subtitle), "", onValueChange = { it })
-        ContactEditRow(stringResource(R.string.screen_detail_city_subtitle), "", onValueChange = { it })
+        ContactEditRow(
+            stringResource(R.string.screen_detail_name_subtitle),
+            contact?.name ?: "",
+            onValueChange = {
+                println(it)
+                contact?.name = it
+            })
+        ContactEditRow(
+            stringResource(R.string.screen_detail_firstname_subtitle),
+            contact?.firstname ?: "",
+            onValueChange = { contact?.firstname = it })
+        ContactEditRow(
+            stringResource(R.string.screen_detail_birthday_subtitle),
+            contact?.birthday?.toString() ?: "",
+            onValueChange = {}) // Pas besoin de date picker, readonly
+        ContactEditRow(
+            stringResource(R.string.screen_detail_address_subtitle),
+            contact?.address ?: "",
+            onValueChange = { contact?.address = it })
+        ContactEditRow(
+            stringResource(R.string.screen_detail_zip_subtitle),
+            contact?.zip ?: "",
+            onValueChange = { contact?.zip = it })
+        ContactEditRow(
+            stringResource(R.string.screen_detail_city_subtitle),
+            contact?.city ?: "",
+            onValueChange = { contact?.city = it })
 
-        Text(text = stringResource(R.string.screen_detail_phonetype_subtitle), fontSize = 18.sp, modifier = Modifier.padding(6.dp, 0.dp))
+        Text(
+            text = stringResource(R.string.screen_detail_phonetype_subtitle),
+            fontSize = 18.sp,
+            modifier = Modifier.padding(6.dp, 0.dp)
+        )
+
         Row {
             PhoneType.values().forEach {
                 RadioButton(
@@ -47,36 +75,89 @@ fun ScreenContactEditor (contact: Contact?, onQuit: () -> Unit) {
             }
         }
 
-        ContactEditRow(stringResource(R.string.screen_detail_phonenumber_subtitle), "", onValueChange = { it })
+        ContactEditRow(
+            stringResource(R.string.screen_detail_phonenumber_subtitle),
+            contact?.phoneNumber ?: "",
+            onValueChange = { contact?.phoneNumber = it })
 
-
-        // TODO: utiliser les bons icônes
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement= Arrangement.SpaceEvenly, verticalAlignment = Alignment.CenterVertically) {
-            Button(onClick = { onQuit }, ) {
-                Text(text= stringResource(R.string.screen_detail_btn_cancel))
-            }
-            Button(onClick = { /*TODO*/ }) {
-                Text(text= stringResource(R.string.screen_detail_btn_delete))
-                Icon(Icons.Default.Delete ,contentDescription = stringResource(R.string.screen_detail_btn_delete))
-            }
-            Button(onClick = { /*TODO*/ }) {
-                Text(text= stringResource(R.string.screen_detail_btn_save))
-                Icon(Icons.Default.Add ,contentDescription = stringResource(R.string.screen_detail_btn_save))
+        ButtonSection(editionMode = contact != null) {
+            when(it) {
+                "quit" -> onQuit()
+                "delete" -> println("TODO delete contact")
+                "save" -> println("TODO edit contact")
+                "create" -> println("TODO create contact")
             }
         }
+
     }
 }
 
 @Composable
 fun ContactEditRow(label: String, value: String, onValueChange: (String) -> Unit) {
-    Row(modifier = Modifier.fillMaxWidth().height(48.dp), horizontalArrangement= Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(48.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
 
         Box {
             Text(text = label, fontSize = 18.sp, modifier = Modifier.padding(6.dp, 0.dp))
         }
 
         Box {
-            TextField(value = value , onValueChange = {onValueChange})
+            TextField(value = value, onValueChange = onValueChange)
+        }
+    }
+}
+
+@Composable
+fun ButtonSection(editionMode: Boolean, onAction: (String) -> Unit) {
+    // TODO: utiliser les bons icônes
+    when (editionMode) {
+        true -> {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Button(onClick = { onAction("quit") }) {
+                    Text(text = stringResource(R.string.screen_detail_btn_cancel))
+                }
+                Button(onClick = { onAction("delete") }) {
+                    Text(text = stringResource(R.string.screen_detail_btn_delete))
+                    Icon(
+                        Icons.Default.Delete,
+                        contentDescription = stringResource(R.string.screen_detail_btn_delete)
+                    )
+                }
+                Button(onClick = { onAction("save") }) {
+                    Text(text = stringResource(R.string.screen_detail_btn_save))
+                    Icon(
+                        Icons.Default.Add,
+                        contentDescription = stringResource(R.string.screen_detail_btn_save)
+                    )
+                }
+            }
+        }
+        false -> Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+
+
+            ) {
+            Button(onClick = { onAction("quit") }) {
+                Text(text = stringResource(R.string.screen_detail_btn_cancel))
+            }
+            Button(onClick = { onAction("create") }) {
+                Text(text = stringResource(R.string.screen_detail_btn_save))
+                Icon(
+                    Icons.Default.Add,
+                    contentDescription = stringResource(R.string.screen_detail_btn_create)
+                )
+            }
         }
     }
 }
