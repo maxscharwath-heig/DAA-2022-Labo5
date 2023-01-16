@@ -16,9 +16,15 @@ import androidx.compose.ui.unit.sp
 import ch.heigvd.iict.and.rest.R
 import ch.heigvd.iict.and.rest.models.Contact
 import ch.heigvd.iict.and.rest.models.PhoneType
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 
 @Composable
 fun ScreenContactEditor(contact: Contact?, onQuit: () -> Unit) {
+
+    val (tmpContact, setTmpContact) = remember {
+        mutableStateOf(contact?.copy())
+    }
 
     // TODO: etat sauvegardé: https://developer.android.com/jetpack/compose/state#restore-ui-state
 
@@ -27,19 +33,20 @@ fun ScreenContactEditor(contact: Contact?, onQuit: () -> Unit) {
     Column(modifier = Modifier.padding(6.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Text(text = stringResource(R.string.screen_detail_title_new), fontSize = 22.sp)
 
-        // todo: map functions to contact object
-
         ContactEditRow(
             stringResource(R.string.screen_detail_name_subtitle),
-            contact?.name ?: "",
+            tmpContact?.name ?: "",
             onValueChange = {
-                println(it)
-                contact?.name = it
+                /*
+                var test = tmpContact?.copy()
+                test?.name  += it
+                setTmpContact(test)
+                 */
             })
         ContactEditRow(
             stringResource(R.string.screen_detail_firstname_subtitle),
-            contact?.firstname ?: "",
-            onValueChange = { contact?.firstname = it })
+            tmpContact?.firstname ?: "",
+            onValueChange = { tmpContact?.firstname = it })
         ContactEditRow(
             stringResource(R.string.screen_detail_birthday_subtitle),
             contact?.birthday?.toString() ?: "",
@@ -81,11 +88,11 @@ fun ScreenContactEditor(contact: Contact?, onQuit: () -> Unit) {
             onValueChange = { contact?.phoneNumber = it })
 
         ButtonSection(editionMode = contact != null) {
-            when(it) {
+            when (it) {
                 "quit" -> onQuit()
                 "delete" -> println("TODO delete contact")
                 "save" -> println("TODO edit contact")
-                "create" -> println("TODO create contact")
+                "create" -> println(tmpContact?.name)
             }
         }
 

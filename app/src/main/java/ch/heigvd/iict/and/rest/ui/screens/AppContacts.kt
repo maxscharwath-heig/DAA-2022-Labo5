@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -28,25 +29,21 @@ fun AppContact(application: ContactsApplication, contactsViewModel : ContactsVie
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text(text = stringResource(R.string.app_name)) },
-                actions = {
-                    IconButton(onClick = {
-                        contactsViewModel.enroll()
-                    }) { Icon(painter = painterResource(R.drawable.populate), contentDescription = null) }
-                    IconButton(onClick = {
-                        contactsViewModel.refresh()
-                    }) { Icon(painter = painterResource(R.drawable.synchronize), contentDescription = null) }
-                }
-            )
+            if (editionMode == true) {
+                EditionMenu(contactsViewModel = contactsViewModel)
+            } else {
+                HomeMenu(contactsViewModel = contactsViewModel)
+            }
         },
         floatingActionButtonPosition = FabPosition.End,
         floatingActionButton = {
-            FloatingActionButton(onClick = {
-                contactsViewModel.toggleEditionMode(true)
-                contactsViewModel.setEditingContact(null)
-            }){
-                Icon(Icons.Default.Add, contentDescription = null)
+            if (editionMode == false) {
+                FloatingActionButton(onClick = {
+                    contactsViewModel.toggleEditionMode(true)
+                    contactsViewModel.setEditingContact(null)
+                }){
+                    Icon(Icons.Default.Add, contentDescription = null)
+                }
             }
         },
     )
@@ -66,3 +63,34 @@ fun AppContact(application: ContactsApplication, contactsViewModel : ContactsVie
         }
     }
 }
+@Composable
+fun HomeMenu(contactsViewModel: ContactsViewModel) {
+    TopAppBar(
+        title = { Text(text = stringResource(R.string.app_name)) },
+        actions = {
+            IconButton(onClick = {
+                contactsViewModel.enroll()
+            }) { Icon(painter = painterResource(R.drawable.populate), contentDescription = null) }
+            IconButton(onClick = {
+                contactsViewModel.refresh()
+            }) { Icon(painter = painterResource(R.drawable.synchronize), contentDescription = null) }
+        }
+    )
+}
+
+@Composable
+fun EditionMenu(contactsViewModel: ContactsViewModel) {
+    TopAppBar(
+        title = { Text(text = stringResource(R.string.app_name)) },
+        navigationIcon = {
+            IconButton(onClick = {
+                contactsViewModel.toggleEditionMode(false)
+                contactsViewModel.setEditingContact(null)
+            }) {
+                Icon(Icons.Default.ArrowBack, "Back")
+            }
+        }
+    )
+}
+
+
