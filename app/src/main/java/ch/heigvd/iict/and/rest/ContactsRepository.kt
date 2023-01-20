@@ -20,7 +20,6 @@ class ContactsRepository(
     }
 
     suspend fun create(contact: Contact) = withContext(Dispatchers.IO) {
-        // TODO: API Req
         contactsDao.insert(contact)
     }
 
