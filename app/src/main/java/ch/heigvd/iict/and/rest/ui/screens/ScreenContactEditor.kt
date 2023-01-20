@@ -17,18 +17,20 @@ import ch.heigvd.iict.and.rest.R
 import ch.heigvd.iict.and.rest.models.Contact
 import ch.heigvd.iict.and.rest.models.PhoneType
 import ch.heigvd.iict.and.rest.viewmodels.ContactsViewModel
+import java.text.SimpleDateFormat
+import java.util.*
 
 @Composable
-fun ScreenContactEditor(contactViewModel: ContactsViewModel, contact: Contact?, onQuit: () -> Unit) {
+fun ScreenContactEditor(
+    contactViewModel: ContactsViewModel,
+    contact: Contact?,
+    onQuit: () -> Unit
+) {
 
     // TODO: etat sauvegardé: https://developer.android.com/jetpack/compose/state#restore-ui-state
 
-    val (selectedOption, onOptionSelected) = remember { mutableStateOf(PhoneType.HOME) } // tmp test
-
     Column(modifier = Modifier.padding(6.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Text(text = stringResource(R.string.screen_detail_title_new), fontSize = 22.sp)
-
-        Text(text = contact?.name ?: "", fontSize = 22.sp)
 
         ContactEditRow(
             stringResource(R.string.screen_detail_name_subtitle),
@@ -39,11 +41,11 @@ fun ScreenContactEditor(contactViewModel: ContactsViewModel, contact: Contact?, 
         ContactEditRow(
             stringResource(R.string.screen_detail_firstname_subtitle),
             contact?.firstname ?: "",
-            onValueChange = { contact?.firstname = it})
+            onValueChange = { contact?.firstname = it })
         ContactEditRow(
             stringResource(R.string.screen_detail_birthday_subtitle),
-            contact?.birthday?.toString() ?: "",
-            onValueChange = {}) // Pas besoin de date picker, readonly
+            formatCalendar(contact?.birthday),
+            onValueChange = {}) // Pas besoin de date picker, readonly ?
         ContactEditRow(
             stringResource(R.string.screen_detail_address_subtitle),
             contact?.address ?: "",
@@ -63,16 +65,8 @@ fun ScreenContactEditor(contactViewModel: ContactsViewModel, contact: Contact?, 
             modifier = Modifier.padding(6.dp, 0.dp)
         )
 
-        Row {
-            PhoneType.values().forEach {
-                RadioButton(
-                    selected = (selectedOption == contact?.type),
-                    onClick = { onOptionSelected(it) }
-                )
-                Text(
-                    text = it.toString(),
-                )
-            }
+        PhoneTypeRadioGroup(selected = contact?.type ?: PhoneType.HOME) {
+            contact?.type = it
         }
 
         ContactEditRow(
@@ -173,4 +167,35 @@ fun ButtonSection(editionMode: Boolean, onAction: (String) -> Unit) {
             }
         }
     }
+}
+
+@Composable
+fun PhoneTypeRadioGroup(selected: PhoneType?, onSelect: (PhoneType) -> Unit) {
+    val choices = PhoneType.values()
+    val (sel, setSelected) = remember { mutableStateOf(selected) }
+
+    // TODO: click sur label doit selectionner la radio
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        choices.forEach {
+            RadioButton(
+                selected = (it == sel),
+                onClick = {
+                    setSelected(it)
+                    onSelect(it)
+                }
+            )
+            Text(
+                text = it.toString(),
+            )
+        }
+    }
+}
+
+fun formatCalendar(cal: Calendar?): String {
+    if (cal == null) {
+        return ""
+    }
+    val time = cal.time
+    val sdf = SimpleDateFormat("dd/M/yyyy")
+    return sdf.format(time)
 }
