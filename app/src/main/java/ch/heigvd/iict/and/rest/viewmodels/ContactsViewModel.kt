@@ -13,9 +13,6 @@ class ContactsViewModel(application: ContactsApplication) : AndroidViewModel(app
     private val repository = application.repository
     private lateinit var uuid: String
 
-    private val keyGenParameterSpec = MasterKeys.AES256_GCM_SPEC
-    private val mainKeyAlias = MasterKeys.getOrCreate(keyGenParameterSpec)
-
     private val securePreferences = EncryptedSharedPreferences.create(
         "sharedPrefs",
         MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC),
