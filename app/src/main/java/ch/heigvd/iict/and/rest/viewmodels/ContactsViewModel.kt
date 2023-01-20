@@ -2,6 +2,8 @@ package ch.heigvd.iict.and.rest.viewmodels
 
 import android.util.Log
 import androidx.lifecycle.*
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKeys
 import ch.heigvd.iict.and.rest.ContactsApplication
 import ch.heigvd.iict.and.rest.models.Contact
 import kotlinx.coroutines.launch
@@ -11,6 +13,14 @@ class ContactsViewModel(application: ContactsApplication) : AndroidViewModel(app
     private val repository = application.repository
     private lateinit var uuid: String
 
+    private val securePreferences = EncryptedSharedPreferences.create(
+        "sharedPrefs",
+        MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC),
+        application,
+        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+    )
+
     val allContacts = repository.allContacts
     var editingContact: MutableLiveData<Contact?> = MutableLiveData(null)
     var editionMode: MutableLiveData<Boolean> = MutableLiveData(false)
@@ -19,6 +29,12 @@ class ContactsViewModel(application: ContactsApplication) : AndroidViewModel(app
         viewModelScope.launch {
             uuid = repository.enroll()
             Log.d("ContactsViewModel", "Enroll UUID: $uuid")
+
+            with(securePreferences.edit()) {
+                Log.d("ContactsViewModel", "Save UUID to secure preferences")
+                putString("uuid", uuid)
+                apply()
+            }
         }
     }
 
