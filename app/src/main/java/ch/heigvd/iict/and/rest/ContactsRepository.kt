@@ -19,18 +19,17 @@ class ContactsRepository(
         url.readText(UTF_8)
     }
 
-    suspend fun create(contact: Contact) = withContext(Dispatchers.IO) {
-        // TODO: API Req
+    suspend fun create(contact: Contact, uuid: String) = withContext(Dispatchers.IO) {
         contactsDao.insert(contact)
     }
 
-    suspend fun update(contact: Contact) = withContext(Dispatchers.IO) {
+    suspend fun update(contact: Contact,  uuid: String) = withContext(Dispatchers.IO) {
         // TODO: req
         contactsDao.update(contact)
     }
 
     // TODO: pass just the id ?
-    suspend fun delete(contact: Contact) = withContext(Dispatchers.IO) {
+    suspend fun delete(contact: Contact,  uuid: String) = withContext(Dispatchers.IO) {
         // TODO: req
         contactsDao.delete(contact)
     }

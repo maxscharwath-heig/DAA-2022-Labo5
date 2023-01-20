@@ -11,7 +11,6 @@ import kotlinx.coroutines.launch
 class ContactsViewModel(application: ContactsApplication) : AndroidViewModel(application) {
 
     private val repository = application.repository
-    private lateinit var uuid: String
 
     private val securePreferences = EncryptedSharedPreferences.create(
         "sharedPrefs",
@@ -20,6 +19,8 @@ class ContactsViewModel(application: ContactsApplication) : AndroidViewModel(app
         EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
         EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
     )
+
+    private var uuid: String = securePreferences.getString("uuid", "") ?: ""
 
     val allContacts = repository.allContacts
     var editingContact: MutableLiveData<Contact?> = MutableLiveData(null)
@@ -54,19 +55,19 @@ class ContactsViewModel(application: ContactsApplication) : AndroidViewModel(app
 
     fun create(contact: Contact) {
         viewModelScope.launch {
-            repository.create(contact)
+            repository.create(contact, uuid)
         }
     }
 
     fun update(contact: Contact) {
         viewModelScope.launch {
-            repository.update(contact)
+            repository.update(contact, uuid)
         }
     }
 
     fun delete(contact: Contact) {
         viewModelScope.launch {
-            repository.delete(contact)
+            repository.delete(contact, uuid)
         }
     }
 
