@@ -11,7 +11,6 @@ import kotlinx.coroutines.launch
 class ContactsViewModel(application: ContactsApplication) : AndroidViewModel(application) {
 
     private val repository = application.repository
-    private lateinit var uuid: String
 
     private val securePreferences = EncryptedSharedPreferences.create(
         "sharedPrefs",
