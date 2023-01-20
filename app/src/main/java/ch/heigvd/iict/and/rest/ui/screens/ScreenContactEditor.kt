@@ -1,6 +1,5 @@
 package ch.heigvd.iict.and.rest.ui.screens
 
-import androidx.compose.animation.core.estimateAnimationDurationMillis
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -17,16 +16,10 @@ import androidx.compose.ui.unit.sp
 import ch.heigvd.iict.and.rest.R
 import ch.heigvd.iict.and.rest.models.Contact
 import ch.heigvd.iict.and.rest.models.PhoneType
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import ch.heigvd.iict.and.rest.viewmodels.ContactsViewModel
 
 @Composable
 fun ScreenContactEditor(contactViewModel: ContactsViewModel, contact: Contact?, onQuit: () -> Unit) {
-
-    val (tmpContact, setTmpContact) = remember {
-        mutableStateOf(contact?.copy())
-    }
 
     // TODO: etat sauvegardé: https://developer.android.com/jetpack/compose/state#restore-ui-state
 
@@ -35,21 +28,18 @@ fun ScreenContactEditor(contactViewModel: ContactsViewModel, contact: Contact?, 
     Column(modifier = Modifier.padding(6.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Text(text = stringResource(R.string.screen_detail_title_new), fontSize = 22.sp)
 
+        Text(text = contact?.name ?: "", fontSize = 22.sp)
+
         ContactEditRow(
             stringResource(R.string.screen_detail_name_subtitle),
-            tmpContact?.name ?: "",
+            contact?.name ?: "",
             onValueChange = {
-                contact?.name ?: ""
-                /*
-                var test = tmpContact?.copy()
-                test?.name  += it
-                setTmpContact(test)
-                 */
+                contact?.name = it
             })
         ContactEditRow(
             stringResource(R.string.screen_detail_firstname_subtitle),
-            tmpContact?.firstname ?: "",
-            onValueChange = { tmpContact?.firstname = it })
+            contact?.firstname ?: "",
+            onValueChange = { contact?.firstname = it})
         ContactEditRow(
             stringResource(R.string.screen_detail_birthday_subtitle),
             contact?.birthday?.toString() ?: "",
@@ -93,8 +83,14 @@ fun ScreenContactEditor(contactViewModel: ContactsViewModel, contact: Contact?, 
         ButtonSection(editionMode = contact != null) {
             when (it) {
                 "quit" -> onQuit()
-                "delete" -> contactViewModel.delete(contact!!)
-                "save" -> contactViewModel.update(contact!!)
+                "delete" -> {
+                    contactViewModel.delete(contact!!)
+                    onQuit()
+                }
+                "save" -> {
+                    contactViewModel.update(contact!!)
+                    onQuit()
+                }
                 "create" -> contactViewModel.create(contact!!)
             }
         }
@@ -104,6 +100,10 @@ fun ScreenContactEditor(contactViewModel: ContactsViewModel, contact: Contact?, 
 
 @Composable
 fun ContactEditRow(label: String, value: String, onValueChange: (String) -> Unit) {
+    val rValue = remember {
+        mutableStateOf(value)
+    }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -117,7 +117,10 @@ fun ContactEditRow(label: String, value: String, onValueChange: (String) -> Unit
         }
 
         Box {
-            TextField(value = value, onValueChange = onValueChange)
+            TextField(value = rValue.value, onValueChange = {
+                rValue.value = it
+                onValueChange(rValue.value)
+            })
         }
     }
 }
