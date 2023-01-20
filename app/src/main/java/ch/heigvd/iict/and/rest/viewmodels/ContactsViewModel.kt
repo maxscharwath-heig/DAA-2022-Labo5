@@ -21,6 +21,8 @@ class ContactsViewModel(application: ContactsApplication) : AndroidViewModel(app
         EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
     )
 
+    private var uuid: String = securePreferences.getString("uuid", "") ?: ""
+
     val allContacts = repository.allContacts
     var editingContact: MutableLiveData<Contact?> = MutableLiveData(null)
     var editionMode: MutableLiveData<Boolean> = MutableLiveData(false)
@@ -54,19 +56,19 @@ class ContactsViewModel(application: ContactsApplication) : AndroidViewModel(app
 
     fun create(contact: Contact) {
         viewModelScope.launch {
-            repository.create(contact)
+            repository.create(contact, uuid)
         }
     }
 
     fun update(contact: Contact) {
         viewModelScope.launch {
-            repository.update(contact)
+            repository.update(contact, uuid)
         }
     }
 
     fun delete(contact: Contact) {
         viewModelScope.launch {
-            repository.delete(contact)
+            repository.delete(contact, uuid)
         }
     }
 
