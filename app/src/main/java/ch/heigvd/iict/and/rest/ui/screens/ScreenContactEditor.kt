@@ -1,5 +1,6 @@
 package ch.heigvd.iict.and.rest.ui.screens
 
+import androidx.compose.animation.core.estimateAnimationDurationMillis
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -18,9 +19,10 @@ import ch.heigvd.iict.and.rest.models.Contact
 import ch.heigvd.iict.and.rest.models.PhoneType
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import ch.heigvd.iict.and.rest.viewmodels.ContactsViewModel
 
 @Composable
-fun ScreenContactEditor(contact: Contact?, onQuit: () -> Unit) {
+fun ScreenContactEditor(contactViewModel: ContactsViewModel, contact: Contact?, onQuit: () -> Unit) {
 
     val (tmpContact, setTmpContact) = remember {
         mutableStateOf(contact?.copy())
@@ -37,6 +39,7 @@ fun ScreenContactEditor(contact: Contact?, onQuit: () -> Unit) {
             stringResource(R.string.screen_detail_name_subtitle),
             tmpContact?.name ?: "",
             onValueChange = {
+                contact?.name ?: ""
                 /*
                 var test = tmpContact?.copy()
                 test?.name  += it
@@ -90,9 +93,9 @@ fun ScreenContactEditor(contact: Contact?, onQuit: () -> Unit) {
         ButtonSection(editionMode = contact != null) {
             when (it) {
                 "quit" -> onQuit()
-                "delete" -> println("TODO delete contact")
-                "save" -> println("TODO edit contact")
-                "create" -> println(tmpContact?.name)
+                "delete" -> contactViewModel.delete(contact!!)
+                "save" -> contactViewModel.update(contact!!)
+                "create" -> contactViewModel.create(contact!!)
             }
         }
 

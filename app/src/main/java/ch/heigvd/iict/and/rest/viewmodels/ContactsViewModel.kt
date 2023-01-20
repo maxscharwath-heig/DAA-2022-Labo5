@@ -36,6 +36,26 @@ class ContactsViewModel(application: ContactsApplication) : AndroidViewModel(app
         editionMode.value = active
     }
 
+    fun create(contact: Contact) {
+        viewModelScope.launch {
+            repository.create(contact)
+        }
+    }
+
+    fun update(contact: Contact) {
+        viewModelScope.launch {
+            repository.update(contact)
+        }
+    }
+
+    fun delete(contact: Contact) {
+        viewModelScope.launch {
+            repository.delete(contact)
+        }
+    }
+
+
+
 }
 
 class ContactsViewModelFactory(private val application: ContactsApplication) : ViewModelProvider.Factory {

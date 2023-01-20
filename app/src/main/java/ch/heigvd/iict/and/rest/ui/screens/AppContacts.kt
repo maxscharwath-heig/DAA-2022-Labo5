@@ -51,7 +51,7 @@ fun AppContact(application: ContactsApplication, contactsViewModel : ContactsVie
         Column(modifier = Modifier.padding(padding)) { }
 
         if (editionMode == true) {
-            ScreenContactEditor(contact= editingContact) {
+            ScreenContactEditor(contactViewModel = contactsViewModel, contact= editingContact) {
                 contactsViewModel.editionMode.value = false
             }
         } else {
