@@ -10,7 +10,7 @@ data class Contact(
     var state: ContactState,
     var name: String,
     var firstname: String?,
-    var birthday: Calendar?,
+    var birthday: String?,
     var email: String?,
     var address: String?,
     var zip: String?,

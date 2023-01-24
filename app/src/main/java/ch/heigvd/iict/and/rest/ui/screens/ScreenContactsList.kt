@@ -76,12 +76,8 @@ fun ContactItemView(contact: Contact, onClick : (Contact) -> Unit) {
     }
 }
 
-val contactsDemo = listOf(
-    Contact(null, ContactState.SYNCED, "Lazar", "Pavarovic", null, null, "", "1400", "Yverdon", PhoneType.HOME, "+41 21 944 23 55"),
-    Contact(null, ContactState.SYNCED,"Nicolas", "Croussaz", null, null, "", "1000", "Lausanne", PhoneType.OFFICE, "+41 24 763 34 12"),
-    Contact(null, ContactState.SYNCED,"Maxime", "Schwartz", null, null, "", "1400", "Yverdon", PhoneType.MOBILE, "+41 21 456 25 36")
-)
 
+/*
 @Preview(showBackground = true)
 @Composable
 fun ContactListPreview() {
@@ -97,3 +93,4 @@ fun ContactItemPreview() {
         ContactItemView(contactsDemo[0], {})
     }
 }
+ */

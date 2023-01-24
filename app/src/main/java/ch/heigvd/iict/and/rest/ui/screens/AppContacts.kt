@@ -22,7 +22,6 @@ import ch.heigvd.iict.and.rest.viewmodels.ContactsViewModelFactory
 
 @Composable
 fun AppContact(application: ContactsApplication, contactsViewModel : ContactsViewModel = viewModel(factory= ContactsViewModelFactory(application))) {
-    val context = LocalContext.current
     val contacts : List<Contact> by contactsViewModel.allContacts.observeAsState(initial = emptyList())
     val editionMode: Boolean? by contactsViewModel.editionMode.observeAsState()
     val editingContact: Contact? by contactsViewModel.editingContact.observeAsState()
@@ -58,7 +57,6 @@ fun AppContact(application: ContactsApplication, contactsViewModel : ContactsVie
             ScreenContactList(contacts) { selectedContact ->
                 contactsViewModel.toggleEditionMode(true)
                 contactsViewModel.setEditingContact(selectedContact)
-                Toast.makeText(context, "Edition de ${selectedContact.firstname} ${selectedContact.name}", Toast.LENGTH_SHORT).show()
             }
         }
     }

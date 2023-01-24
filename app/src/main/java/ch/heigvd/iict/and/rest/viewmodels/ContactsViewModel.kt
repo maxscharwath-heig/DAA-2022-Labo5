@@ -22,12 +22,16 @@ class ContactsViewModel(application: ContactsApplication) : AndroidViewModel(app
 
     private var uuid: String = securePreferences.getString("uuid", "") ?: ""
 
-    val allContacts = repository.allContacts
+    val allContacts: LiveData<List<Contact>> = repository.allContacts
     var editingContact: MutableLiveData<Contact?> = MutableLiveData(null)
     var editionMode: MutableLiveData<Boolean> = MutableLiveData(false)
 
     fun enroll() {
         viewModelScope.launch {
+            // Delete the local data
+            repository.deleteAll()
+
+            // Enroll a new UUID
             uuid = repository.enroll()
             Log.d("ContactsViewModel", "Enroll UUID: $uuid")
 
@@ -36,12 +40,15 @@ class ContactsViewModel(application: ContactsApplication) : AndroidViewModel(app
                 putString("uuid", uuid)
                 apply()
             }
+
+            // Get the contacts and insert into DB
+            repository.getAllAndInsert(uuid)
         }
     }
 
     fun refresh() {
         viewModelScope.launch {
-            //TODO
+            // todo: synchro les dirtys
         }
     }
 

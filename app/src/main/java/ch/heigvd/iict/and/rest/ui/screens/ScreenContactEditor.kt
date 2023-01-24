@@ -14,6 +14,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ch.heigvd.iict.and.rest.R
+import ch.heigvd.iict.and.rest.database.converters.CalendarConverter
 import ch.heigvd.iict.and.rest.models.Contact
 import ch.heigvd.iict.and.rest.models.PhoneType
 import ch.heigvd.iict.and.rest.viewmodels.ContactsViewModel
@@ -26,7 +27,6 @@ fun ScreenContactEditor(
     contact: Contact?,
     onQuit: () -> Unit
 ) {
-
     // TODO: etat sauvegardé: https://developer.android.com/jetpack/compose/state#restore-ui-state
 
     Column(modifier = Modifier.padding(6.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -44,8 +44,8 @@ fun ScreenContactEditor(
             onValueChange = { contact?.firstname = it })
         ContactEditRow(
             stringResource(R.string.screen_detail_birthday_subtitle),
-            formatCalendar(contact?.birthday),
-            onValueChange = {}) // Pas besoin de date picker, readonly ?
+            contact?.birthday ?: "",
+            onValueChange = {}) // Pas besoin de date picker, readonly ? // todo: ajouter readonly prop
         ContactEditRow(
             stringResource(R.string.screen_detail_address_subtitle),
             contact?.address ?: "",
@@ -85,7 +85,10 @@ fun ScreenContactEditor(
                     contactViewModel.update(contact!!)
                     onQuit()
                 }
-                "create" -> contactViewModel.create(contact!!)
+                "create" -> {
+                    contactViewModel.create(contact!!)
+                    onQuit()
+                }
             }
         }
 
@@ -195,7 +198,8 @@ fun formatCalendar(cal: Calendar?): String {
     if (cal == null) {
         return ""
     }
-    val time = cal.time
-    val sdf = SimpleDateFormat("dd/M/yyyy")
+
+    val time = CalendarConverter().fromCalendar(cal)
+    val sdf = SimpleDateFormat("dd/M/yyyy", Locale.FRENCH)
     return sdf.format(time)
 }
