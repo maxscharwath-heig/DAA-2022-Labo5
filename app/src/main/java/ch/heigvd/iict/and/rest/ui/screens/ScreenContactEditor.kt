@@ -1,6 +1,10 @@
 package ch.heigvd.iict.and.rest.ui.screens
 
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -14,12 +18,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ch.heigvd.iict.and.rest.R
-import ch.heigvd.iict.and.rest.database.converters.CalendarConverter
 import ch.heigvd.iict.and.rest.models.Contact
 import ch.heigvd.iict.and.rest.models.PhoneType
 import ch.heigvd.iict.and.rest.viewmodels.ContactsViewModel
-import java.text.SimpleDateFormat
-import java.util.*
 
 @Composable
 fun ScreenContactEditor(
@@ -27,9 +28,12 @@ fun ScreenContactEditor(
     contact: Contact?,
     onQuit: () -> Unit
 ) {
-    // TODO: etat sauvegardé: https://developer.android.com/jetpack/compose/state#restore-ui-state
-
-    Column(modifier = Modifier.padding(6.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+    Column(
+        modifier = Modifier
+            .padding(6.dp)
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
         Text(text = stringResource(R.string.screen_detail_title_new), fontSize = 22.sp)
 
         ContactEditRow(
@@ -45,7 +49,8 @@ fun ScreenContactEditor(
         ContactEditRow(
             stringResource(R.string.screen_detail_birthday_subtitle),
             contact?.birthday ?: "",
-            onValueChange = {}) // Pas besoin de date picker, readonly ? // todo: ajouter readonly prop
+            onValueChange = {}, readonly = true
+        ) // TODO: quand meme formatter la date
         ContactEditRow(
             stringResource(R.string.screen_detail_address_subtitle),
             contact?.address ?: "",
@@ -96,7 +101,12 @@ fun ScreenContactEditor(
 }
 
 @Composable
-fun ContactEditRow(label: String, value: String, onValueChange: (String) -> Unit) {
+fun ContactEditRow(
+    label: String,
+    value: String,
+    onValueChange: (String) -> Unit,
+    readonly: Boolean = false
+) {
     val rValue = remember {
         mutableStateOf(value)
     }
@@ -117,7 +127,7 @@ fun ContactEditRow(label: String, value: String, onValueChange: (String) -> Unit
             TextField(value = rValue.value, onValueChange = {
                 rValue.value = it
                 onValueChange(rValue.value)
-            })
+            }, readOnly = readonly)
         }
     }
 }
@@ -192,14 +202,4 @@ fun PhoneTypeRadioGroup(selected: PhoneType?, onSelect: (PhoneType) -> Unit) {
             )
         }
     }
-}
-
-fun formatCalendar(cal: Calendar?): String {
-    if (cal == null) {
-        return ""
-    }
-
-    val time = CalendarConverter().fromCalendar(cal)
-    val sdf = SimpleDateFormat("dd/M/yyyy", Locale.FRENCH)
-    return sdf.format(time)
 }

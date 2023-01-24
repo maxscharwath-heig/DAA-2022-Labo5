@@ -43,12 +43,13 @@ class ContactsViewModel(application: ContactsApplication) : AndroidViewModel(app
 
             // Get the contacts and insert into DB
             repository.getAllAndInsert(uuid)
+            println(uuid)
         }
     }
 
     fun refresh() {
         viewModelScope.launch {
-            // todo: synchro les dirtys
+            repository.retryDirties(uuid)
         }
     }
 
@@ -77,9 +78,6 @@ class ContactsViewModel(application: ContactsApplication) : AndroidViewModel(app
             repository.delete(contact, uuid)
         }
     }
-
-
-
 }
 
 class ContactsViewModelFactory(private val application: ContactsApplication) : ViewModelProvider.Factory {

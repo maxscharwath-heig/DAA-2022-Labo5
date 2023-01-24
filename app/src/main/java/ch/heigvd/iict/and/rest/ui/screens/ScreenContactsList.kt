@@ -1,5 +1,6 @@
 package ch.heigvd.iict.and.rest.ui.screens
 
+import androidx.compose.animation.VectorConverter
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -9,6 +10,8 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -59,8 +62,13 @@ fun ContactItemView(contact: Contact, onClick : (Contact) -> Unit) {
         },
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically) {
-        Image(painter = painterResource(id = R.drawable.contact), contentDescription = stringResource(id = R.string.screen_list_contacticon_ctndesc))
-        Column(modifier = Modifier.weight(1f).padding(horizontal = 10.dp, vertical = 2.dp),
+        Image(painter = painterResource(id = R.drawable.contact),
+            contentDescription = stringResource(id = R.string.screen_list_contacticon_ctndesc),
+            colorFilter = ColorFilter.tint(if (contact.isSynced()) Color.Green else Color.Red)
+        )
+        Column(modifier = Modifier
+            .weight(1f)
+            .padding(horizontal = 10.dp, vertical = 2.dp),
             horizontalAlignment = Alignment.Start) {
             Text(text = "${contact.firstname} ${contact.name}")
             Text(text = "${contact.phoneNumber}")
