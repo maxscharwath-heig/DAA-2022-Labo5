@@ -2,7 +2,6 @@ package ch.heigvd.iict.and.rest.models
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import java.util.*
 
 @Entity
 data class Contact(
@@ -18,6 +17,22 @@ data class Contact(
     var type: PhoneType?,
     var phoneNumber: String?
 ) {
+
+    // TODO: a better way ?
+    constructor() : this(
+        null,
+        ContactState.CREATED,
+        "",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+    )
+
     fun isSynced() = state == ContactState.SYNCED
 
     override fun toString(): String {

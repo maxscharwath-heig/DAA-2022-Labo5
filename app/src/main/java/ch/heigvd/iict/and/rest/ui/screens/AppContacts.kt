@@ -1,6 +1,5 @@
 package ch.heigvd.iict.and.rest.ui.screens
 
-import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -10,7 +9,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -51,7 +49,7 @@ fun AppContact(application: ContactsApplication, contactsViewModel : ContactsVie
 
         if (editionMode == true) {
             ScreenContactEditor(contactViewModel = contactsViewModel, contact= editingContact) {
-                contactsViewModel.editionMode.value = false
+                contactsViewModel.toggleEditionMode(false)
             }
         } else {
             ScreenContactList(contacts) { selectedContact ->

@@ -1,7 +1,6 @@
 package ch.heigvd.iict.and.rest.ui.screens
 
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.scrollable
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -26,8 +25,12 @@ import ch.heigvd.iict.and.rest.viewmodels.ContactsViewModel
 fun ScreenContactEditor(
     contactViewModel: ContactsViewModel,
     contact: Contact?,
-    onQuit: () -> Unit
+    onQuit: () -> Unit,
 ) {
+    val tmpContact = remember {
+        mutableStateOf(contact?.copy() ?: Contact()) // TODO: a better way ?
+    }
+
     Column(
         modifier = Modifier
             .padding(6.dp)
@@ -38,31 +41,31 @@ fun ScreenContactEditor(
 
         ContactEditRow(
             stringResource(R.string.screen_detail_name_subtitle),
-            contact?.name ?: "",
+            tmpContact.value.name,
             onValueChange = {
-                contact?.name = it
+                tmpContact.value.name = it
             })
         ContactEditRow(
             stringResource(R.string.screen_detail_firstname_subtitle),
-            contact?.firstname ?: "",
-            onValueChange = { contact?.firstname = it })
+            tmpContact.value.firstname ?: "",
+            onValueChange = { tmpContact.value.firstname = it })
         ContactEditRow(
             stringResource(R.string.screen_detail_birthday_subtitle),
-            contact?.birthday ?: "",
+            tmpContact.value.birthday ?: "",
             onValueChange = {}, readonly = true
-        ) // TODO: quand meme formatter la date
+        ) // TODO: formatter la date
         ContactEditRow(
             stringResource(R.string.screen_detail_address_subtitle),
-            contact?.address ?: "",
-            onValueChange = { contact?.address = it })
+            tmpContact.value.address ?: "",
+            onValueChange = { tmpContact.value.address = it })
         ContactEditRow(
             stringResource(R.string.screen_detail_zip_subtitle),
-            contact?.zip ?: "",
-            onValueChange = { contact?.zip = it })
+            tmpContact.value.zip ?: "",
+            onValueChange = { tmpContact.value.zip = it })
         ContactEditRow(
             stringResource(R.string.screen_detail_city_subtitle),
-            contact?.city ?: "",
-            onValueChange = { contact?.city = it })
+            tmpContact.value.city ?: "",
+            onValueChange = { tmpContact.value.city = it })
 
         Text(
             text = stringResource(R.string.screen_detail_phonetype_subtitle),
@@ -70,33 +73,32 @@ fun ScreenContactEditor(
             modifier = Modifier.padding(6.dp, 0.dp)
         )
 
-        PhoneTypeRadioGroup(selected = contact?.type ?: PhoneType.HOME) {
-            contact?.type = it
+        PhoneTypeRadioGroup(selected = tmpContact.value.type ?: PhoneType.HOME) {
+            tmpContact.value.type = it
         }
 
         ContactEditRow(
             stringResource(R.string.screen_detail_phonenumber_subtitle),
-            contact?.phoneNumber ?: "",
-            onValueChange = { contact?.phoneNumber = it })
+            tmpContact.value.phoneNumber ?: "",
+            onValueChange = { tmpContact.value.phoneNumber = it })
 
         ButtonSection(editionMode = contact != null) {
             when (it) {
                 "quit" -> onQuit()
                 "delete" -> {
-                    contactViewModel.delete(contact!!)
+                    contactViewModel.delete(tmpContact.value!!)
                     onQuit()
                 }
                 "save" -> {
-                    contactViewModel.update(contact!!)
+                    contactViewModel.update(tmpContact.value!!)
                     onQuit()
                 }
                 "create" -> {
-                    contactViewModel.create(contact!!)
+                    contactViewModel.create(tmpContact.value!!)
                     onQuit()
                 }
             }
         }
-
     }
 }
 

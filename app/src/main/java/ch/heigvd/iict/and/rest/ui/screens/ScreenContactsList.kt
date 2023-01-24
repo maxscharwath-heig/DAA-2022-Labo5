@@ -1,6 +1,5 @@
 package ch.heigvd.iict.and.rest.ui.screens
 
-import androidx.compose.animation.VectorConverter
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -15,14 +14,11 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ch.heigvd.iict.and.rest.R
 import ch.heigvd.iict.and.rest.models.Contact
-import ch.heigvd.iict.and.rest.models.ContactState
 import ch.heigvd.iict.and.rest.models.PhoneType
-import ch.heigvd.iict.and.rest.ui.theme.MyComposeApplicationTheme
 
 @Composable
 fun ScreenContactList(contacts : List<Contact>, onContactSelected : (Contact) -> Unit ) {
@@ -46,7 +42,6 @@ fun ScreenContactList(contacts : List<Contact>, onContactSelected : (Contact) ->
                     }
                 }
             }
-
         }
     }
 }
@@ -83,22 +78,3 @@ fun ContactItemView(contact: Contact, onClick : (Contact) -> Unit) {
             contentDescription = stringResource(id = R.string.screen_list_contacttype_ctndesc))
     }
 }
-
-
-/*
-@Preview(showBackground = true)
-@Composable
-fun ContactListPreview() {
-    MyComposeApplicationTheme {
-        ScreenContactList(contactsDemo) {}
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun ContactItemPreview() {
-    MyComposeApplicationTheme {
-        ContactItemView(contactsDemo[0], {})
-    }
-}
- */
