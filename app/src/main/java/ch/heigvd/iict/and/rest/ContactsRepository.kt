@@ -24,13 +24,9 @@ class ContactsRepository(
     }
 
     suspend fun getAllAndInsert(uuid: String) = withContext(Dispatchers.IO) {
-        val url = URL("https://daa.iict.ch/contacts")
-        val connection = url.openConnection() as HttpURLConnection
-        connection.requestMethod = "GET"
-        connection.setRequestProperty("Content-Type", "application/json")
-        connection.setRequestProperty("X-UUID", uuid)
+        val conn = getConnection("https://daa.iict.ch/contacts", "GET", uuid)
 
-        val json = connection.inputStream.bufferedReader(UTF_8).use {
+        val json = conn.inputStream.bufferedReader(UTF_8).use {
             it.readText()
         }
 
@@ -41,22 +37,19 @@ class ContactsRepository(
         }
     }
 
-    suspend fun create(contact: Contact,  uuid: String) = withContext(Dispatchers.IO) {
-        val url = URL("https://daa.iict.ch/contacts")
+    suspend fun create(contact: Contact, uuid: String) = withContext(Dispatchers.IO) {
         val json = Gson().toJson(contact)
         var toCreate: Contact = contact
 
         try {
-            val connection = url.openConnection() as HttpURLConnection
-            connection.requestMethod = "POST"
-            connection.setRequestProperty("Content-Type", "application/json")
-            connection.setRequestProperty("X-UUID", uuid)
-            connection.outputStream.bufferedWriter(UTF_8).use {
+            val conn = getConnection("https://daa.iict.ch/contacts", "POST", uuid)
+
+            conn.outputStream.bufferedWriter(UTF_8).use {
                 it.append(json)
             }
 
-            if (connection.responseCode == 201) {
-                val cJson = connection.inputStream.bufferedReader(UTF_8).use {
+            if (conn.responseCode == 201) {
+                val cJson = conn.inputStream.bufferedReader(UTF_8).use {
                     it.readText()
                 }
                 toCreate = Gson().fromJson(cJson, Contact::class.java)
@@ -68,21 +61,18 @@ class ContactsRepository(
         contactsDao.insert(toCreate)
     }
 
-    suspend fun update(contact: Contact,  uuid: String) = withContext(Dispatchers.IO) {
+    suspend fun update(contact: Contact, uuid: String) = withContext(Dispatchers.IO) {
         val contactId = contact.id
-        val url = URL("https://daa.iict.ch/contacts/$contactId")
         val json = Gson().toJson(contact)
 
         try {
-            val connection = url.openConnection() as HttpURLConnection
-            connection.requestMethod = "PUT"
-            connection.setRequestProperty("Content-Type", "application/json")
-            connection.setRequestProperty("X-UUID", uuid)
-            connection.outputStream.bufferedWriter(UTF_8).use {
+            val conn = getConnection("https://daa.iict.ch/contacts/$contactId", "PUT", uuid)
+
+            conn.outputStream.bufferedWriter(UTF_8).use {
                 it.append(json)
             }
 
-            if (connection.responseCode == 200) {
+            if (conn.responseCode == 200) {
                 contact.state = ContactState.SYNCED
             }
         } catch (e: IOException) {
@@ -94,19 +84,15 @@ class ContactsRepository(
 
     suspend fun delete(contact: Contact, uuid: String) = withContext(Dispatchers.IO) {
         val contactId = contact.id
-        val url = URL("https://daa.iict.ch/contacts/$contactId")
         val json = Gson().toJson(contact)
 
         try {
-            val connection = url.openConnection() as HttpURLConnection
-            connection.requestMethod = "DELETE"
-            connection.setRequestProperty("Content-Type", "application/json")
-            connection.setRequestProperty("X-UUID", uuid)
-            connection.outputStream.bufferedWriter(UTF_8).use {
+            val conn = getConnection("https://daa.iict.ch/contacts/$contactId", "DELETE", uuid)
+            conn.outputStream.bufferedWriter(UTF_8).use {
                 it.append(json)
             }
 
-            if (connection.responseCode == 204) {
+            if (conn.responseCode == 204) {
                 contactsDao.delete(contact)
             }
         } catch (e: IOException) {
@@ -115,20 +101,18 @@ class ContactsRepository(
     }
 
     suspend fun retryDirties(uuid: String) = withContext(Dispatchers.IO) {
-        allContacts.value!!.forEach { c ->
-            if (!c.isSynced()) {
-                when(c.state) {
-                    ContactState.CREATED -> {
-                        create(c, uuid)
-                    }
-                    ContactState.UPDATED -> {
-                        update(c, uuid)
-                    }
-                    ContactState.DELETED -> {
-                        delete(c, uuid)
-                    }
-                    else -> {}
+        contactsDao.getAllUnsyncedContacts().forEach { c ->
+            when (c.state) {
+                ContactState.CREATED -> {
+                    create(c, uuid)
                 }
+                ContactState.UPDATED -> {
+                    update(c, uuid)
+                }
+                ContactState.DELETED -> {
+                    delete(c, uuid)
+                }
+                else -> {}
             }
         }
     }
@@ -137,4 +121,11 @@ class ContactsRepository(
         contactsDao.clearAllContacts()
     }
 
+    private fun getConnection(url: String, method: String, uuid: String): HttpURLConnection {
+        val connection = URL(url).openConnection() as HttpURLConnection
+        connection.requestMethod = method
+        connection.setRequestProperty("Content-Type", "application/json")
+        connection.setRequestProperty("X-UUID", uuid)
+        return connection
+    }
 }

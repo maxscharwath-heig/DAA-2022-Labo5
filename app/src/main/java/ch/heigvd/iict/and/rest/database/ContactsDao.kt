@@ -29,6 +29,9 @@ interface ContactsDao {
     @Query("SELECT * FROM contact WHERE state = :state")
     fun getAllContactsByState(state: ContactState) : List<Contact>
 
+    @Query("SELECT * FROM contact WHERE state != :state")
+    fun getAllUnsyncedContacts(state: ContactState = ContactState.SYNCED) : List<Contact>
+
     @Query("SELECT * FROM Contact WHERE state != :state")
     fun getAllContactsLiveData(state: ContactState = ContactState.DELETED) : LiveData<List<Contact>>
 

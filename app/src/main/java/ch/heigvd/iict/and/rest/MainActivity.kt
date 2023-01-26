@@ -7,7 +7,6 @@ import ch.heigvd.iict.and.rest.ui.screens.AppContact
 import ch.heigvd.iict.and.rest.ui.theme.MyComposeApplicationTheme
 
 class MainActivity : ComponentActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -15,7 +14,5 @@ class MainActivity : ComponentActivity() {
                 AppContact(application = application as ContactsApplication)
             }
         }
-
     }
-
 }

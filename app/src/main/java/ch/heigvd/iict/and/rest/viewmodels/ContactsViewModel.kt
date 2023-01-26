@@ -10,6 +10,10 @@ import kotlinx.coroutines.launch
 
 class ContactsViewModel(application: ContactsApplication) : AndroidViewModel(application) {
 
+    companion object {
+        const val UUID_KEY = "uuid"
+    }
+
     private val repository = application.repository
 
     private val securePreferences = EncryptedSharedPreferences.create(
@@ -20,7 +24,7 @@ class ContactsViewModel(application: ContactsApplication) : AndroidViewModel(app
         EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
     )
 
-    private var uuid: String = securePreferences.getString("uuid", "") ?: ""
+    private var uuid: String = securePreferences.getString(UUID_KEY, "") ?: ""
 
     val allContacts: LiveData<List<Contact>> = repository.allContacts
     var editingContact: MutableLiveData<Contact?> = MutableLiveData(null)
@@ -37,13 +41,12 @@ class ContactsViewModel(application: ContactsApplication) : AndroidViewModel(app
 
             with(securePreferences.edit()) {
                 Log.d("ContactsViewModel", "Save UUID to secure preferences")
-                putString("uuid", uuid)
+                putString(UUID_KEY, uuid)
                 apply()
             }
 
             // Get the contacts and insert into DB
             repository.getAllAndInsert(uuid)
-            println(uuid)
         }
     }
 

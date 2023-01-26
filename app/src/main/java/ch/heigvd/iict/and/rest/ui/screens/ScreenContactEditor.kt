@@ -1,6 +1,5 @@
 package ch.heigvd.iict.and.rest.ui.screens
 
-import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -28,7 +27,7 @@ fun ScreenContactEditor(
     onQuit: () -> Unit,
 ) {
     val tmpContact = remember {
-        mutableStateOf(contact?.copy() ?: Contact()) // TODO: a better way ?
+        mutableStateOf(contact?.copy() ?: Contact())
     }
 
     Column(
@@ -115,8 +114,7 @@ fun ContactEditRow(
 
     Row(
         modifier = Modifier
-            .fillMaxWidth()
-            .height(48.dp),
+            .fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
