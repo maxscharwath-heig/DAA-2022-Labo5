@@ -1,5 +1,6 @@
 package ch.heigvd.iict.and.rest
 
+import android.util.Log
 import ch.heigvd.iict.and.rest.database.ContactsDao
 import ch.heigvd.iict.and.rest.models.Contact
 import ch.heigvd.iict.and.rest.models.ContactState
@@ -67,6 +68,8 @@ class ContactsRepository(
         val contactId = contact.remoteId
         val json = Json.encodeToString(Contact.serializer(), contact)
 
+        Log.d("id", contactId.toString())
+
         if (contactId != null) {
             try {
                 val conn = getConnection("https://daa.iict.ch/contacts/$contactId", "PUT", uuid)
@@ -79,7 +82,7 @@ class ContactsRepository(
                     contact.state = ContactState.SYNCED
                 }
             } catch (e: IOException) {
-                if (contact.state != ContactState.SYNCED) {
+                if (contact.state == ContactState.SYNCED) {
                     contact.state = ContactState.UPDATED
                 }
             }
