@@ -13,19 +13,15 @@ import kotlinx.serialization.encoding.Encoder
 import java.text.SimpleDateFormat
 import java.util.*
 
-// TODO: add remote id
-
-
 @Serializable
 @Entity
 data class Contact(
     @PrimaryKey(autoGenerate = true) var id: Long? = null,
-    @Transient
-    var state: ContactState = ContactState.CREATED,
+    var remoteId: Long? = null,
+    @Transient var state: ContactState = ContactState.SYNCED,
     var name: String,
     var firstname: String?,
-    @Serializable(CalendarSerializer::class)
-    var birthday: Calendar?,
+    @Serializable(CalendarSerializer::class) var birthday: Calendar?,
     var email: String?,
     var address: String?,
     var zip: String?,
@@ -35,17 +31,18 @@ data class Contact(
 ) {
 
     constructor() : this(
-        null,
-        ContactState.CREATED,
-        "",
-        "",
-        null,
-        "",
-        "",
-        "",
-        "",
-        PhoneType.HOME,
-        "",
+        id = null,
+        remoteId = null,
+        state = ContactState.CREATED,
+        name = "",
+        firstname = "",
+        birthday = null,
+        email = "",
+        address = "",
+        zip = "",
+        city = "",
+        type = PhoneType.HOME,
+        phoneNumber = "",
     )
 
     fun isSynced() = state == ContactState.SYNCED

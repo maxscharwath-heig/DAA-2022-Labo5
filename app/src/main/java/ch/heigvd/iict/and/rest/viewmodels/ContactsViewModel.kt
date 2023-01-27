@@ -36,17 +36,21 @@ class ContactsViewModel(application: ContactsApplication) : AndroidViewModel(app
             repository.deleteAll()
 
             // Enroll a new UUID
-            uuid = repository.enroll()
-            Log.d("ContactsViewModel", "Enroll UUID: $uuid")
+            try {
+                uuid = repository.enroll()
+                Log.d("ContactsViewModel", "Enroll UUID: $uuid")
 
-            with(securePreferences.edit()) {
-                Log.d("ContactsViewModel", "Save UUID to secure preferences")
-                putString(UUID_KEY, uuid)
-                apply()
+                with(securePreferences.edit()) {
+                    Log.d("ContactsViewModel", "Save UUID to secure preferences")
+                    putString(UUID_KEY, uuid)
+                    apply()
+                }
+
+                // Get the contacts and insert into DB
+                repository.getAllAndInsert(uuid)
+            } catch (e: Exception) {
+                Log.d("Enrollment", "failed")
             }
-
-            // Get the contacts and insert into DB
-            repository.getAllAndInsert(uuid)
         }
     }
 

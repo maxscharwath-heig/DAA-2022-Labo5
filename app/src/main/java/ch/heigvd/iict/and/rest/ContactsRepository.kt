@@ -13,7 +13,6 @@ import java.net.HttpURLConnection
 import java.net.URL
 import kotlin.text.Charsets.UTF_8
 
-
 class ContactsRepository(
     private val contactsDao: ContactsDao,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO
@@ -34,6 +33,7 @@ class ContactsRepository(
 
         val contacts = Json.decodeFromString(ListSerializer(Contact.serializer()), json)
         contacts.forEach { c ->
+            c.remoteId = c.id
             c.state = ContactState.SYNCED
             contactsDao.insert(c)
         }
@@ -41,7 +41,6 @@ class ContactsRepository(
 
     suspend fun create(contact: Contact, uuid: String) = withContext(Dispatchers.IO) {
         val json = Json.encodeToString(Contact.serializer(), contact)
-        var toCreate: Contact = contact
 
         try {
             val conn = getConnection("https://daa.iict.ch/contacts", "POST", uuid)
@@ -54,49 +53,58 @@ class ContactsRepository(
                 val cJson = conn.inputStream.bufferedReader(UTF_8).use {
                     it.readText()
                 }
-                toCreate = Json.decodeFromString(Contact.serializer(), cJson)
-                toCreate.state = ContactState.SYNCED
-            }
-        } catch (e: IOException) {
-            toCreate.state = ContactState.CREATED
-        }
-        contactsDao.insert(toCreate)
-    }
-
-    suspend fun update(contact: Contact, uuid: String) = withContext(Dispatchers.IO) {
-        val contactId = contact.id
-        val json = Json.encodeToString(Contact.serializer(), contact)
-
-        try {
-            val conn = getConnection("https://daa.iict.ch/contacts/$contactId", "PUT", uuid)
-
-            conn.outputStream.bufferedWriter(UTF_8).use {
-                it.append(json)
-            }
-
-            if (conn.responseCode == 200) {
+                val created = Json.decodeFromString(Contact.serializer(), cJson)
+                contact.remoteId = created.id
                 contact.state = ContactState.SYNCED
             }
         } catch (e: IOException) {
-            contact.state = ContactState.UPDATED
+            contact.state = ContactState.CREATED
+        }
+        contactsDao.insert(contact)
+    }
+
+    suspend fun update(contact: Contact, uuid: String) = withContext(Dispatchers.IO) {
+        val contactId = contact.remoteId
+        val json = Json.encodeToString(Contact.serializer(), contact)
+
+        if (contactId != null) {
+            try {
+                val conn = getConnection("https://daa.iict.ch/contacts/$contactId", "PUT", uuid)
+
+                conn.outputStream.bufferedWriter(UTF_8).use {
+                    it.append(json)
+                }
+
+                if (conn.responseCode == 200) {
+                    contact.state = ContactState.SYNCED
+                }
+            } catch (e: IOException) {
+                if (contact.state != ContactState.SYNCED) {
+                    contact.state = ContactState.UPDATED
+                }
+            }
         }
         contactsDao.update(contact)
     }
 
     suspend fun delete(contact: Contact, uuid: String) = withContext(Dispatchers.IO) {
-        val contactId = contact.id
+        val contactId = contact.remoteId
         val json = Json.encodeToString(Contact.serializer(), contact)
 
-        try {
-            val conn = getConnection("https://daa.iict.ch/contacts/$contactId", "DELETE", uuid)
-            conn.outputStream.bufferedWriter(UTF_8).use {
-                it.append(json)
-            }
+        if (contactId != null) {
+            try {
+                val conn = getConnection("https://daa.iict.ch/contacts/$contactId", "DELETE", uuid)
+                conn.outputStream.bufferedWriter(UTF_8).use {
+                    it.append(json)
+                }
 
-            if (conn.responseCode == 204) {
-                contactsDao.delete(contact)
+                if (conn.responseCode == 204) {
+                    contactsDao.delete(contact)
+                }
+            } catch (e: IOException) {
+                contactsDao.softDelete(contact)
             }
-        } catch (e: IOException) {
+        } else {
             contactsDao.softDelete(contact)
         }
     }
