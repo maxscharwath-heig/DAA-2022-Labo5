@@ -19,6 +19,9 @@ import ch.heigvd.iict.and.rest.R
 import ch.heigvd.iict.and.rest.models.Contact
 import ch.heigvd.iict.and.rest.models.PhoneType
 import ch.heigvd.iict.and.rest.viewmodels.ContactsViewModel
+import java.text.DateFormat
+import java.text.SimpleDateFormat
+import java.util.*
 
 @Composable
 fun ScreenContactEditor(
@@ -50,9 +53,9 @@ fun ScreenContactEditor(
             onValueChange = { tmpContact.value.firstname = it })
         ContactEditRow(
             stringResource(R.string.screen_detail_birthday_subtitle),
-            tmpContact.value.birthday ?: "",
-            onValueChange = {}, readonly = true
-        ) // TODO: formatter la date
+            formatCalendar(tmpContact.value.birthday),
+            onValueChange = {}
+        )
         ContactEditRow(
             stringResource(R.string.screen_detail_address_subtitle),
             tmpContact.value.address ?: "",
@@ -202,4 +205,13 @@ fun PhoneTypeRadioGroup(selected: PhoneType?, onSelect: (PhoneType) -> Unit) {
             )
         }
     }
+}
+
+fun formatCalendar(cal: Calendar?): String {
+    if (cal == null) {
+        return ""
+    }
+    val date = Calendar.getInstance().time
+    val dateFormat: DateFormat = SimpleDateFormat("yyyy-mm-dd")
+    return dateFormat.format(date)
 }

@@ -3,14 +3,16 @@ package ch.heigvd.iict.and.rest
 import ch.heigvd.iict.and.rest.database.ContactsDao
 import ch.heigvd.iict.and.rest.models.Contact
 import ch.heigvd.iict.and.rest.models.ContactState
-import com.google.gson.Gson
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.json.Json
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
 import kotlin.text.Charsets.UTF_8
+
 
 class ContactsRepository(
     private val contactsDao: ContactsDao,
@@ -30,7 +32,7 @@ class ContactsRepository(
             it.readText()
         }
 
-        val contacts = Gson().fromJson(json, Array<Contact>::class.java)
+        val contacts = Json.decodeFromString(ListSerializer(Contact.serializer()), json)
         contacts.forEach { c ->
             c.state = ContactState.SYNCED
             contactsDao.insert(c)
@@ -38,7 +40,7 @@ class ContactsRepository(
     }
 
     suspend fun create(contact: Contact, uuid: String) = withContext(Dispatchers.IO) {
-        val json = Gson().toJson(contact)
+        val json = Json.encodeToString(Contact.serializer(), contact)
         var toCreate: Contact = contact
 
         try {
@@ -52,7 +54,7 @@ class ContactsRepository(
                 val cJson = conn.inputStream.bufferedReader(UTF_8).use {
                     it.readText()
                 }
-                toCreate = Gson().fromJson(cJson, Contact::class.java)
+                toCreate = Json.decodeFromString(Contact.serializer(), cJson)
                 toCreate.state = ContactState.SYNCED
             }
         } catch (e: IOException) {
@@ -63,7 +65,7 @@ class ContactsRepository(
 
     suspend fun update(contact: Contact, uuid: String) = withContext(Dispatchers.IO) {
         val contactId = contact.id
-        val json = Gson().toJson(contact)
+        val json = Json.encodeToString(Contact.serializer(), contact)
 
         try {
             val conn = getConnection("https://daa.iict.ch/contacts/$contactId", "PUT", uuid)
@@ -78,13 +80,12 @@ class ContactsRepository(
         } catch (e: IOException) {
             contact.state = ContactState.UPDATED
         }
-
         contactsDao.update(contact)
     }
 
     suspend fun delete(contact: Contact, uuid: String) = withContext(Dispatchers.IO) {
         val contactId = contact.id
-        val json = Gson().toJson(contact)
+        val json = Json.encodeToString(Contact.serializer(), contact)
 
         try {
             val conn = getConnection("https://daa.iict.ch/contacts/$contactId", "DELETE", uuid)
