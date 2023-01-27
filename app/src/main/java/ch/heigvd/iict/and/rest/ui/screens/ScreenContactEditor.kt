@@ -19,10 +19,17 @@ import ch.heigvd.iict.and.rest.R
 import ch.heigvd.iict.and.rest.models.Contact
 import ch.heigvd.iict.and.rest.models.PhoneType
 import ch.heigvd.iict.and.rest.viewmodels.ContactsViewModel
-import java.text.DateFormat
-import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.util.*
 
+/**
+ * Edition of contact
+ *
+ * @author Nicolas Crausaz
+ * @author Lazar Pavicevic
+ * @author Maxime Scharwath
+ */
 @Composable
 fun ScreenContactEditor(
     contactViewModel: ContactsViewModel,
@@ -33,6 +40,9 @@ fun ScreenContactEditor(
         mutableStateOf(contact?.copy() ?: Contact())
     }
 
+    val tmpBirthday = remember {
+        mutableStateOf(formatCalendar(contact?.birthday))
+    }
     Column(
         modifier = Modifier
             .padding(6.dp)
@@ -53,8 +63,8 @@ fun ScreenContactEditor(
             onValueChange = { tmpContact.value.firstname = it })
         ContactEditRow(
             stringResource(R.string.screen_detail_birthday_subtitle),
-            formatCalendar(tmpContact.value.birthday),
-            onValueChange = {}
+            tmpBirthday.value,
+            onValueChange = { tmpBirthday.value = it }
         )
         ContactEditRow(
             stringResource(R.string.screen_detail_address_subtitle),
@@ -92,10 +102,12 @@ fun ScreenContactEditor(
                     onQuit()
                 }
                 "save" -> {
+                    tmpContact.value.birthday = calendarFromString(tmpBirthday.value)
                     contactViewModel.update(tmpContact.value!!)
                     onQuit()
                 }
                 "create" -> {
+                    tmpContact.value.birthday = calendarFromString(tmpBirthday.value)
                     contactViewModel.create(tmpContact.value!!)
                     onQuit()
                 }
@@ -137,7 +149,6 @@ fun ContactEditRow(
 
 @Composable
 fun ButtonSection(editionMode: Boolean, onAction: (String) -> Unit) {
-    // TODO: utiliser les bons icônes
     when (editionMode) {
         true -> {
             Row(
@@ -190,7 +201,6 @@ fun PhoneTypeRadioGroup(selected: PhoneType?, onSelect: (PhoneType) -> Unit) {
     val choices = PhoneType.values()
     val (sel, setSelected) = remember { mutableStateOf(selected) }
 
-    // TODO: click sur label doit selectionner la radio
     Row(verticalAlignment = Alignment.CenterVertically) {
         choices.forEach {
             RadioButton(
@@ -208,10 +218,17 @@ fun PhoneTypeRadioGroup(selected: PhoneType?, onSelect: (PhoneType) -> Unit) {
 }
 
 fun formatCalendar(cal: Calendar?): String {
-    if (cal == null) {
-        return ""
+    val dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
+    val str = cal?.let {
+        dateFormatter.format(LocalDate.of(it.get(Calendar.YEAR), it.get(Calendar.MONTH) + 1, it.get(Calendar.DAY_OF_MONTH)))
     }
-    val date = Calendar.getInstance().time
-    val dateFormat: DateFormat = SimpleDateFormat("yyyy-mm-dd")
-    return dateFormat.format(date)
+    return str ?: ""
+}
+
+fun calendarFromString(str: String): Calendar? {
+    val dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
+    val date = LocalDate.parse(str, dateFormatter)
+    return Calendar.getInstance().apply {
+        set(date.year, date.monthValue - 1, date.dayOfMonth)
+    }
 }

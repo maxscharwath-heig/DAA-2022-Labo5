@@ -1,6 +1,5 @@
 package ch.heigvd.iict.and.rest
 
-import android.util.Log
 import ch.heigvd.iict.and.rest.database.ContactsDao
 import ch.heigvd.iict.and.rest.models.Contact
 import ch.heigvd.iict.and.rest.models.ContactState
@@ -14,6 +13,13 @@ import java.net.HttpURLConnection
 import java.net.URL
 import kotlin.text.Charsets.UTF_8
 
+/**
+ * Repository for contact synchronisation and CRUD logic
+ *
+ * @author Nicolas Crausaz
+ * @author Lazar Pavicevic
+ * @author Maxime Scharwath
+ */
 class ContactsRepository(
     private val contactsDao: ContactsDao,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO
@@ -67,8 +73,6 @@ class ContactsRepository(
     suspend fun update(contact: Contact, uuid: String) = withContext(Dispatchers.IO) {
         val contactId = contact.remoteId
         val json = Json.encodeToString(Contact.serializer(), contact)
-
-        Log.d("id", contactId.toString())
 
         if (contactId != null) {
             try {
