@@ -59,7 +59,7 @@ fun ContactItemView(contact: Contact, onClick : (Contact) -> Unit) {
         verticalAlignment = Alignment.CenterVertically) {
         Image(painter = painterResource(id = R.drawable.contact),
             contentDescription = stringResource(id = R.string.screen_list_contacticon_ctndesc),
-            colorFilter = ColorFilter.tint(if (contact.isSynced()) Color.Green else Color.Red)
+            colorFilter = ColorFilter.tint(if (contact.isSynced()) Color.Green else Color(0xFFFF9768)),
         )
         Column(modifier = Modifier
             .weight(1f)
